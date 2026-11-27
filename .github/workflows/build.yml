@@ -12,8 +12,16 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.1.1'
-      - run: gradle build --no-daemon
+      - name: Build
+        run: |
+          for z in *.zip; do [ -f "$z" ] && unzip -o -q "$z"; done
+          DIR=$(dirname "$(find . -name settings.gradle | head -n 1)")
+          echo "Mod folder: $DIR"
+          cd "$DIR"
+          gradle build --no-daemon
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp build/libs/*.jar "$GITHUB_WORKSPACE/out/"
       - uses: actions/upload-artifact@v4
         with:
           name: easybuild-forge-jar
-          path: build/libs/*.jar
+          path: out/*.jar
